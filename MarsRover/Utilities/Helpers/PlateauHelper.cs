@@ -14,24 +14,39 @@ namespace MarsRover.Utilities.Helpers
             {
                 Console.WriteLine("Please define a plateau by entering two integers specifying the width and height.\nExample: 5 5");
                 string[] plateaus = Console.ReadLine().ToUpper().Trim().Split(' ');
-                if (plateaus.Length == 2)
+
+                try
                 {
-                    try
-                    {
-                        int weight = Convert.ToInt32(plateaus[0]);
-                        int height = Convert.ToInt32(plateaus[1]);
-                        plateau = new Plateau { LastXCoordinate = weight, LastYCoordinate = height };
+                    plateau = GetPlateau(plateaus);
+                    if (plateau != null)
                         result = true;
-                        
-                    }
-                    catch (Exception)
-                    {
+                    else
                         Console.WriteLine("Incorrect value!");
-                    }
+
                 }
-                else
+                catch (Exception)
                 {
                     Console.WriteLine("Incorrect value!");
+                }
+            }
+
+            return plateau;
+        }
+
+        public static Plateau GetPlateau(string[] plateaus)
+        {
+            Plateau plateau = null;
+            if (plateaus.Length == 2)
+            {
+                try
+                {
+                    int weight = Convert.ToInt32(plateaus[0]);
+                    int height = Convert.ToInt32(plateaus[1]);
+                    plateau = new Plateau { LastXCoordinate = weight, LastYCoordinate = height };
+                }
+                catch (Exception)
+                {
+                    plateau = null;
                 }
             }
 

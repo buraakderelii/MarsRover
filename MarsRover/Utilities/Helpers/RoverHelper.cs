@@ -16,56 +16,70 @@ namespace MarsRover.Utilities.Helpers
             {
                 Console.WriteLine("Please locate the rover by entering a combination of x and y coordinates and \na letter representing one of the four main compass points.\nExample: 1 2 N");
                 string[] rovers = Console.ReadLine().ToUpper().Trim().Split(' ');
-                if (rovers.Length == 3)
+
+                try
                 {
-                    try
+                    rover = GetRover(rovers);
+
+                    if (rover != null)
                     {
-                        int x = Convert.ToInt32(rovers[0]);
-                        int y = Convert.ToInt32(rovers[1]);
-                        string direction = rovers[2];
-
-                        IDirectionService directionService = null;
-                        switch (direction)
-                        {
-                            case "N":
-                                directionService = new NorthDirectionManager();
-                                break;
-                            case "S":
-                                directionService = new SouthDirectionManager();
-                                break;
-                            case "W":
-                                directionService = new WestDirectionManager();
-                                break;
-                            case "E":
-                                directionService = new EastDirectionManager();
-                                break;
-                            default:
-                                break;
-                        }
-
-                        if (directionService != null)
-                        {
-                            if (plateau.FirstXCoordinate > x || plateau.FirstYCoordinate > y
-                                || plateau.LastYCoordinate < y || plateau.LastXCoordinate < x)
-                                Console.WriteLine("The rover cannot be located outside the plateau!");
-                            else
-                            {
-                                rover = new Rover(new Location { XCoordinate = x, YCoordinate = y }, directionService);
-                                result = true;
-                            }
-                        }
+                        if (plateau.FirstXCoordinate > rover.Location.XCoordinate || plateau.FirstYCoordinate > rover.Location.YCoordinate
+                            || plateau.LastYCoordinate < rover.Location.YCoordinate || plateau.LastXCoordinate < rover.Location.XCoordinate)
+                            Console.WriteLine("The rover cannot be located outside the plateau!");
                         else
-                            Console.WriteLine("Incorrect compass point!");
-
+                            result = true;
                     }
-                    catch (Exception)
-                    {
+                    else
                         Console.WriteLine("Incorrect value!");
-                    }
+
                 }
-                else
+                catch (Exception)
                 {
                     Console.WriteLine("Incorrect value!");
+                }
+            }
+
+            return rover;
+        }
+
+        public static Rover GetRover(string[] rovers)
+        {
+            Rover rover = null;
+
+            if (rovers.Length == 3)
+            {
+                try
+                {
+                    int x = Convert.ToInt32(rovers[0]);
+                    int y = Convert.ToInt32(rovers[1]);
+                    string direction = rovers[2];
+
+                    IDirectionService directionService = null;
+                    switch (direction)
+                    {
+                        case "N":
+                            directionService = new NorthDirectionManager();
+                            break;
+                        case "S":
+                            directionService = new SouthDirectionManager();
+                            break;
+                        case "W":
+                            directionService = new WestDirectionManager();
+                            break;
+                        case "E":
+                            directionService = new EastDirectionManager();
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (directionService != null)
+                        rover = new Rover(new Location { XCoordinate = x, YCoordinate = y }, directionService);
+
+                }
+                catch (Exception)
+                {
+                    rover = null;
                 }
             }
 
@@ -87,36 +101,41 @@ namespace MarsRover.Utilities.Helpers
                 {
                     try
                     {
-                        foreach (char instruction in instructions)
-                        {
-                            switch (instruction)
-                            {
-                                case 'L':
-                                    rover.Direction = rover.Direction.TurnLeft();
-                                    break;
-                                case 'R':
-                                    rover.Direction = rover.Direction.TurnRight();
-                                    break;
-                                case 'M':
-                                    rover.Direction.MoveForward(rover.Location);
-                                    break;
-                                default:
-                                    throw new Exception("Incorrect instruction!");
-                            }
-                        }
+                        ApplyInstructions(rover, instructions);
 
                         result = true;
                     }
                     catch (Exception)
                     {
                         rover.Direction = firestDirectionService;
-                        rover.Location = new Location { XCoordinate = firstX, YCoordinate = firstY};
+                        rover.Location = new Location { XCoordinate = firstX, YCoordinate = firstY };
                         Console.WriteLine("Incorrect instruction!");
                     }
                 }
                 else
                 {
                     Console.WriteLine("Please enter a value!");
+                }
+            }
+        }
+
+        public static void ApplyInstructions(Rover rover, string instructions)
+        {
+            foreach (char instruction in instructions)
+            {
+                switch (instruction)
+                {
+                    case 'L':
+                        rover.Direction = rover.Direction.TurnLeft();
+                        break;
+                    case 'R':
+                        rover.Direction = rover.Direction.TurnRight();
+                        break;
+                    case 'M':
+                        rover.Direction.MoveForward(rover.Location);
+                        break;
+                    default:
+                        throw new Exception("Incorrect instruction!");
                 }
             }
         }
